@@ -6,7 +6,6 @@ import forex.domain.Rate.Pair
 import forex.domain._
 import io.circe._
 import io.circe.generic.semiauto._
-import io.circe.java8.time._
 
 object Protocol {
 
@@ -25,13 +24,16 @@ object Protocol {
   implicit val currencyEncoder: Encoder[Currency] =
     Encoder.instance[Currency] { show.show _ andThen Json.fromString }
 
-  implicit val pairEncoder: Encoder[Pair] =
-    deriveEncoder[Pair]
+  implicit val currencyDecoder: Decoder[Currency] =
+    (c: HCursor) => c.as[String].map(Currency.fromString)
 
-  implicit val rateEncoder: Encoder[Rate] =
-    deriveEncoder[Rate]
+  implicit val pairCodec: Codec[Pair] =
+    deriveCodec[Pair]
 
-  implicit val responseEncoder: Encoder[GetApiResponse] =
-    deriveEncoder[GetApiResponse]
+  implicit val rateCodec: Codec[Rate] =
+    deriveCodec[Rate]
+
+  implicit val responseCodec: Codec[GetApiResponse] =
+    deriveCodec[GetApiResponse]
 
 }
