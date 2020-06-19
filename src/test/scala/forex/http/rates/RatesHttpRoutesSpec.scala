@@ -32,6 +32,29 @@ class RatesHttpRoutesSpec extends AsyncFreeSpec with HttpTestSpec with AsyncIOSp
       )
 
     }
+
+    "should return BadRequest with error message in json format if incorrect currency specified" in {
+
+      assertHttp(
+        httpModule.httpApp,
+        Request(method = Method.GET, uri = uri"/rates?from=CHF&to=AAA")
+      )(
+        Status.BadRequest,
+        ErrorResponse("Incorrect currency specified")
+      )
+
+    }
+
+    "should return NotFound if some parameter is missing" in {
+
+      assertHttpStatus(
+        httpModule.httpApp,
+        Request(method = Method.GET, uri = uri"/rates?from=CHF")
+      )(
+        Status.NotFound
+      )
+
+    }
   }
 
 }
