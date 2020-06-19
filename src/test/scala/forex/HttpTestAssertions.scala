@@ -8,7 +8,7 @@ import org.http4s._
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers
 
-trait HttpTestSpec extends Matchers {
+trait HttpTestAssertions { self: Matchers =>
 
   def assertHttp[A: Encoder](routes: HttpApp[IO], req: Request[IO])(
       expectedStatus: Status,

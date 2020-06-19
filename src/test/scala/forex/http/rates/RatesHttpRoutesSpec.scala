@@ -5,15 +5,16 @@ import forex.config.ApplicationConfig
 import forex.domain.Currency.{ CAD, CHF }
 import forex.domain.Price
 import forex.http.rates.Protocol._
-import forex.{ HttpTestSpec, Module }
+import forex.{ HttpTestAssertions, Module }
 import org.http4s.implicits._
 import org.http4s.{ Method, Request, Status }
 import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 import cats.effect.testing.scalatest.AsyncIOSpec
 import org.scalatest.freespec.AsyncFreeSpec
+import org.scalatest.matchers.should.Matchers
 
-class RatesHttpRoutesSpec extends AsyncFreeSpec with HttpTestSpec with AsyncIOSpec {
+class RatesHttpRoutesSpec extends AsyncFreeSpec with HttpTestAssertions with AsyncIOSpec with Matchers {
 
   val config = ConfigSource.default.at("app").loadOrThrow[ApplicationConfig]
 
