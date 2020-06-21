@@ -9,12 +9,14 @@ object Dependencies {
     val http4s     = "0.21.2"
     val circe      = "0.13.0"
     val pureConfig = "0.12.1"
+    val sttp       = "2.0.7"
 
     val kindProjector       = "0.9.10"
     val logback             = "1.2.3"
     val scalaCheck          = "1.14.3"
     val scalaTest           = "3.1.0"
     val catsScalaCheck      = "0.2.0"
+    val scalaMock           = "4.4.0"
     val catsEffectScalaTest = "0.4.0"
   }
 
@@ -35,6 +37,8 @@ object Dependencies {
     lazy val circeGenericExt = circe("circe-generic-extras")
     lazy val circeParser     = circe("circe-parser")
     lazy val pureConfig      = "com.github.pureconfig" %% "pureconfig" % Versions.pureConfig
+    lazy val sttpCore        = "com.softwaremill.sttp.client" %% "core" % Versions.sttp
+    lazy val sttpCats        = "com.softwaremill.sttp.client" %% "async-http-client-backend-cats" % Versions.sttp
 
     // Compiler plugins
     lazy val kindProjector = "org.spire-math" %% "kind-projector" % Versions.kindProjector
@@ -46,6 +50,7 @@ object Dependencies {
     lazy val scalaTest           = "org.scalatest"     %% "scalatest"                     % Versions.scalaTest
     lazy val scalaCheck          = "org.scalacheck"    %% "scalacheck"                    % Versions.scalaCheck
     lazy val catsScalaCheck      = "io.chrisdavenport" %% "cats-scalacheck"               % Versions.catsScalaCheck
+    lazy val scalaMock           = "org.scalamock"     %% "scalamock"                     % Versions.scalaMock
     lazy val catsEffectScalaTest = "com.codecommit"    %% "cats-effect-testing-scalatest" % Versions.catsEffectScalaTest
   }
 

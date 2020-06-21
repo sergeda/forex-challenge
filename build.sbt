@@ -41,12 +41,15 @@ libraryDependencies ++= Seq(
   Libraries.http4sCirce,
   Libraries.circeCore,
   Libraries.circeGeneric,
+  Libraries.sttpCore,
+  Libraries.sttpCats,
   Libraries.circeGenericExt,
   Libraries.circeParser,
   Libraries.pureConfig,
   Libraries.logback,
   Libraries.scalaTest           % Test,
   Libraries.scalaCheck          % Test,
+  Libraries.scalaMock          % Test,
   Libraries.catsScalaCheck      % Test,
   Libraries.catsEffectScalaTest % Test
 )

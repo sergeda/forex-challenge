@@ -1,35 +1,41 @@
 package forex.http.rates
 
 import cats.effect.IO
-import forex.config.ApplicationConfig
-import forex.domain.Currency.{ CAD, CHF }
-import forex.domain.Price
+import cats.syntax.either._
+import forex.HttpTestAssertions
+import forex.domain.Currency.{ EUR, USD }
+import forex.domain.{ Price, Rate, Timestamp }
 import forex.http.rates.Protocol._
-import forex.{ HttpTestAssertions, Module }
+import forex.programs.RatesProgram
+import forex.programs.rates.Protocol.GetRatesRequest
+import forex.programs.rates.errors
+import org.http4s.HttpApp
+import org.scalatest.freespec.AnyFreeSpec
+import forex.programs.rates.errors.Error.RateLookupFailed
 import org.http4s.implicits._
 import org.http4s.{ Method, Request, Status }
-import pureconfig.ConfigSource
-import pureconfig.generic.auto._
-import cats.effect.testing.scalatest.AsyncIOSpec
-import org.scalatest.freespec.AsyncFreeSpec
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 
-class RatesHttpRoutesSpec extends AsyncFreeSpec with HttpTestAssertions with AsyncIOSpec with Matchers {
+class RatesHttpRoutesSpec extends AnyFreeSpec with HttpTestAssertions with Matchers with MockFactory {
 
-  val config = ConfigSource.default.at("app").loadOrThrow[ApplicationConfig]
-
-  val httpModule = new Module[IO](config)
+  val ratesProgram            = stub[RatesProgram[IO]]
+  val httpRoutes: HttpApp[IO] = new RatesHttpRoutes[IO](ratesProgram).routes.orNotFound
 
   "Rate route " - {
-    "should return Dummy response" in {
+    "should return correct formatted response" in {
+
+      (ratesProgram.get(_: GetRatesRequest)).when(*) returns IO.pure(
+        Rate(Rate.Pair(USD, EUR), Price(BigDecimal(100)), Timestamp.now).asRight[errors.Error]
+      )
 
       customAssertHttp(
-        httpModule.httpApp,
+        httpRoutes,
         Request(method = Method.GET, uri = uri"/rates?from=CHF&to=CAD")
       )(
         Status.Ok,
         (response: GetApiResponse) =>
-          response.from == CHF && response.to == CAD && response.price == Price(BigDecimal(100))
+          response.from == USD && response.to == EUR && response.price == Price(BigDecimal(100))
       )
 
     }
@@ -37,7 +43,7 @@ class RatesHttpRoutesSpec extends AsyncFreeSpec with HttpTestAssertions with Asy
     "should return BadRequest with error message in json format if incorrect currency specified" in {
 
       assertHttp(
-        httpModule.httpApp,
+        httpRoutes,
         Request(method = Method.GET, uri = uri"/rates?from=CHF&to=AAA")
       )(
         Status.BadRequest,
@@ -46,10 +52,25 @@ class RatesHttpRoutesSpec extends AsyncFreeSpec with HttpTestAssertions with Asy
 
     }
 
+    "should return page with error message in json format if no data can be retrieved" in {
+      (ratesProgram.get(_: GetRatesRequest)).when(*) returns IO.pure(
+        RateLookupFailed("Can't retrieve data").asLeft[Rate]
+      )
+
+      assertHttp(
+        httpRoutes,
+        Request(method = Method.GET, uri = uri"/rates?from=CHF&to=USD")
+      )(
+        Status.Ok,
+        ErrorResponse("Can't retrieve data")
+      )
+
+    }
+
     "should return NotFound if some parameter is missing" in {
 
       assertHttpStatus(
-        httpModule.httpApp,
+        httpRoutes,
         Request(method = Method.GET, uri = uri"/rates?from=CHF")
       )(
         Status.NotFound

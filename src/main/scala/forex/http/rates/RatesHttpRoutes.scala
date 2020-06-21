@@ -20,11 +20,13 @@ class RatesHttpRoutes[F[_]: Sync](rates: RatesProgram[F]) extends Http4sDsl[F] {
   private val httpRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root :? FromQueryParam(maybeFrom) +& ToQueryParam(maybeTo) =>
       Applicative[Option]
-        .map2(maybeFrom, maybeTo)((from, to) => {
-          rates.get(RatesProgramProtocol.GetRatesRequest(from, to)).flatMap(Sync[F].fromEither).flatMap { rate =>
-            Ok(rate.asGetApiResponse)
+        .map2(maybeFrom, maybeTo)(
+          (from, to) =>
+            rates.get(RatesProgramProtocol.GetRatesRequest(from, to)).flatMap {
+              case Left(error) => Ok(ErrorResponse(error.getMessage))
+              case Right(rate) => Ok(rate.asGetApiResponse)
           }
-        })
+        )
         .getOrElse(BadRequest(ErrorResponse("Incorrect currency specified")))
 
   }

@@ -31,7 +31,7 @@ object LiveCache {
       _ <- cleanExpired(clean, state)
     } yield ()
 
-  def of[F[_]: Sync: Clock: Timer, K, V](config: CacheConfig): F[LiveCache[F, K, V]] =
+  def of[F[_]: Sync: Clock: Timer, K, V](config: CacheConfig): F[Cache[F, K, V]] =
     for {
       ref <- Ref[F].of(Map.empty[K, (Long, V)])
       - <- cleanExpired(config.clean, ref)
