@@ -17,10 +17,10 @@ case class HttpConfig(
 case class OneFrameConfig(
     token: String,
     url: String,
-    timeout: FiniteDuration
+    timeout: FiniteDuration,
+    update: FiniteDuration
 )
 
 case class CacheConfig(
     expire: FiniteDuration,
-    clean: FiniteDuration
 )

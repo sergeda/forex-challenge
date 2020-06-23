@@ -6,7 +6,8 @@ import cats.effect.Sync
 import cats.syntax.flatMap._
 import cats.instances.option._
 import forex.programs.RatesProgram
-import forex.programs.rates.{ Protocol => RatesProgramProtocol }
+import forex.programs.rates.errors.Error.RateLookupFailed
+import forex.programs.rates.{Protocol => RatesProgramProtocol}
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import org.http4s.server.Router
@@ -23,11 +24,11 @@ class RatesHttpRoutes[F[_]: Sync](rates: RatesProgram[F]) extends Http4sDsl[F] {
         .map2(maybeFrom, maybeTo)(
           (from, to) =>
             rates.get(RatesProgramProtocol.GetRatesRequest(from, to)).flatMap {
-              case Left(error) => Ok(ErrorResponse(error.getMessage))
+              case Left(RateLookupFailed(message)) => Ok(message)
               case Right(rate) => Ok(rate.asGetApiResponse)
           }
         )
-        .getOrElse(BadRequest(ErrorResponse("Incorrect currency specified")))
+        .getOrElse(BadRequest("Incorrect currency specified"))
 
   }
 

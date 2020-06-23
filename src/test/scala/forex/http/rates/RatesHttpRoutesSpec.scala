@@ -47,7 +47,7 @@ class RatesHttpRoutesSpec extends AnyFreeSpec with HttpTestAssertions with Match
         Request(method = Method.GET, uri = uri"/rates?from=CHF&to=AAA")
       )(
         Status.BadRequest,
-        ErrorResponse("Incorrect currency specified")
+        RateLookupFailed("Incorrect currency specified")
       )
 
     }
@@ -62,7 +62,7 @@ class RatesHttpRoutesSpec extends AnyFreeSpec with HttpTestAssertions with Match
         Request(method = Method.GET, uri = uri"/rates?from=CHF&to=USD")
       )(
         Status.Ok,
-        ErrorResponse("Can't retrieve data")
+        RateLookupFailed("Can't retrieve data")
       )
 
     }

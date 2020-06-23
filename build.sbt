@@ -47,9 +47,12 @@ libraryDependencies ++= Seq(
   Libraries.circeParser,
   Libraries.pureConfig,
   Libraries.logback,
+  Libraries.cache2k,
+  Libraries.scalaCache,
   Libraries.scalaTest           % Test,
   Libraries.scalaCheck          % Test,
   Libraries.scalaMock          % Test,
   Libraries.catsScalaCheck      % Test,
-  Libraries.catsEffectScalaTest % Test
 )
+
+parallelExecution in Test := false

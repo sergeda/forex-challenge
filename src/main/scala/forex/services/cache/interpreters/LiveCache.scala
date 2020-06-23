@@ -1,39 +1,31 @@
 package forex.services.cache.interpreters
 
-import cats.Monad
-import cats.effect.{ Clock, Sync, Timer }
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import cats.effect.concurrent.Ref
-import forex.config.CacheConfig
+import cats.Functor
+import cats.effect.Async
+import forex.domain.Rate
 import forex.services.cache.Cache
+import org.cache2k.Cache2kBuilder
+import scalacache.{Mode, _}
+import scalacache.cache2k.Cache2kCache
 
-import scala.concurrent.duration.{ FiniteDuration, MILLISECONDS }
+import scala.concurrent.duration.FiniteDuration
 
-final class LiveCache[F[_]: Monad: Clock, K, V] private (state: Ref[F, Map[K, (Long, V)]], expires: FiniteDuration)
-    extends Cache[F, K, V] {
-  override def get(key: K): F[Option[V]] = state.get.map(_.get(key).map(_._2))
+final class LiveCache[F[_]: Async: Functor] private(state: Cache2kCache[Rate])
+    extends Cache[F] {
 
-  override def put(key: K, value: V): F[Unit] =
-    for {
-      currentTime <- Clock[F].realTime(MILLISECONDS)
-      _ <- state.update(_.updated(key, (currentTime + expires.toMillis, value)))
-    } yield ()
+  implicit val mode: Mode[F] = scalacache.CatsEffect.modes.async[F]
+
+  override def get(key: String): F[Option[Rate]] = state.get(key)
+
+  override def put(key: String, value: Rate): F[Unit] = state.put(key)(value).asInstanceOf[F[Unit]]
+
 }
 
 object LiveCache {
-  private def cleanExpired[F[_]: Monad: Clock: Timer, K, V](clean: FiniteDuration,
-                                                            state: Ref[F, Map[K, (Long, V)]]): F[Unit] =
-    for {
-      currentTime <- Clock[F].realTime(MILLISECONDS)
-      _ <- state.update(_.filter { case (_, (expiration, _)) => expiration > currentTime })
-      _ <- Timer[F].sleep(clean)
-      _ <- cleanExpired(clean, state)
-    } yield ()
 
-  def of[F[_]: Sync: Clock: Timer, K, V](config: CacheConfig): F[Cache[F, K, V]] =
-    for {
-      ref <- Ref[F].of(Map.empty[K, (Long, V)])
-      - <- cleanExpired(config.clean, ref)
-    } yield new LiveCache(ref, config.expire)
+  def of[F[_]: Async](expires: FiniteDuration): F[Cache[F]] = {
+    val underlyingCache2kCache = new Cache2kBuilder[String, Rate]() {}.expireAfterWrite(expires._1, expires._2).build
+    implicit val customisedCache2kCache: Cache2kCache[Rate] = Cache2kCache(underlyingCache2kCache)
+    Async[F].delay(new LiveCache[F](customisedCache2kCache))
+  }
 }
