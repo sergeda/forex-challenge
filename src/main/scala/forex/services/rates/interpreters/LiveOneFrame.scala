@@ -1,7 +1,7 @@
 package forex.services.rates.interpreters
 
 import cats.data.{ EitherT, NonEmptyList }
-import cats.effect.Concurrent
+import cats.effect.{ Concurrent, Sync, Timer }
 import cats.instances.either.catsStdInstancesForEither
 import cats.instances.string.catsStdShowForString
 import cats.syntax.applicativeError._
@@ -9,8 +9,11 @@ import cats.syntax.either._
 import cats.syntax.flatMap._
 import cats.syntax.foldable._
 import cats.syntax.functor._
+
+import scala.concurrent.duration._
+import retry.RetryPolicies._
+//import cats.implicits._
 import cats.syntax.show._
-import cats.{ Functor, Monad }
 import forex.config.OneFrameConfig
 import forex.domain.Rate
 import forex.services.rates.Converters._
@@ -19,11 +22,15 @@ import forex.services.rates.Protocol._
 import forex.services.rates.errors.Error.OneFrameLookupFailed
 import forex.services.rates.errors._
 import io.circe.parser.decode
+import retry.RetryDetails
 import sttp.client.{ NothingT, SttpBackend, asString, basicRequest, _ }
+import retry.syntax.all._
+import wvlet.log.LogSupport
 
-class LiveOneFrame[F[_]: Monad: Functor: Concurrent](config: OneFrameConfig)(
+class LiveOneFrame[F[_]: Sync: Concurrent: Timer](config: OneFrameConfig)(
     implicit val backend: SttpBackend[F, Nothing, NothingT]
-) extends OneFrame[F] {
+) extends OneFrame[F]
+    with LogSupport {
 
   type ClientResponse = Response[Either[String, String]]
 
@@ -34,8 +41,21 @@ class LiveOneFrame[F[_]: Monad: Functor: Concurrent](config: OneFrameConfig)(
   override def get(pair: Rate.Pair): F[Either[Error, Rate]] =
     EitherT(get(NonEmptyList(pair, List.empty))).map(_.head).value
 
-  override def get(pairs: NonEmptyList[Rate.Pair]): F[Either[Error, NonEmptyList[Rate]]] =
-    recoverResponse(request(pairs)).map(parseResponse)
+  override def get(pairs: NonEmptyList[Rate.Pair]): F[Either[Error, NonEmptyList[Rate]]] = {
+    val backoffPolicy = limitRetriesByCumulativeDelay[F](config.update, exponentialBackoff[F](10.seconds))
+    recoverResponse(request(pairs))
+      .map(parseResponse)
+      .retryingM(
+        policy = backoffPolicy,
+        wasSuccessful = _.isRight,
+        onFailure = (failed: Either[Error, NonEmptyList[Rate]], details: RetryDetails) =>
+          Sync[F].delay(
+            logger.error(
+              s"Couldn't download rates from One Frame. Error: ${failed.left.get.msg}. Retries so far: ${details.retriesSoFar}"
+            )
+        )
+      )
+  }
 
   private def formUrl(pairs: NonEmptyList[Rate.Pair]): String = {
     val requestQuery = pairs.map(_.show).mkString_("pair=", "&pair=", "")

@@ -50,6 +50,7 @@ libraryDependencies ++= Seq(
   Libraries.cache2k,
   Libraries.scalaCache,
   Libraries.catsRetry,
+  Libraries.airframeLog,
   Libraries.scalaTest           % Test,
   Libraries.scalaCheck          % Test,
   Libraries.scalaMock          % Test,

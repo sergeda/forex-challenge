@@ -4,7 +4,7 @@ import java.time.Instant
 
 import forex.services.rates.Converters._
 import cats.data.NonEmptyList
-import cats.effect.{ ContextShift, IO }
+import cats.effect.{ ContextShift, IO, Timer }
 import forex.config.OneFrameConfig
 import forex.domain.Currency.{ CHF, EUR, USD }
 import forex.domain.{ Price, Rate }
@@ -25,6 +25,7 @@ import scala.concurrent.ExecutionContext.global
 class LiveOneFrameSpec extends AnyFreeSpec with EitherValues with MockFactory with Matchers with PrivateMethodTester {
 
   implicit val contextShift: ContextShift[IO] = IO.contextShift(global)
+  implicit val timer: Timer[IO]               = IO.timer(global)
 
   val jsonResponse =
     """[{"from":"EUR","to":"CHF","bid":0.6262930151477809,"ask":0.041126043135137236,"price":0.333709529141459068,"time_stamp":"2020-06-22T07:54:49.451Z"}]"""

@@ -3,15 +3,16 @@ import sbt._
 object Dependencies {
 
   object Versions {
-    val cats       = "2.1.0"
-    val catsEffect = "2.0.0"
-    val fs2        = "2.1.0"
-    val http4s     = "0.21.2"
-    val circe      = "0.13.0"
-    val pureConfig = "0.12.1"
-    val sttp       = "2.0.7"
-    val cacheCats  = "0.28.0"
-    val catsRetry  = "1.0.0"
+    val cats        = "2.1.0"
+    val catsEffect  = "2.0.0"
+    val fs2         = "2.1.0"
+    val http4s      = "0.21.2"
+    val circe       = "0.13.0"
+    val pureConfig  = "0.12.1"
+    val sttp        = "2.0.7"
+    val cacheCats   = "0.28.0"
+    val catsRetry   = "1.0.0"
+    val airframeLog = "20.6.1"
 
     val kindProjector  = "0.9.10"
     val logback        = "1.2.3"
@@ -43,6 +44,7 @@ object Dependencies {
     lazy val cache2k         = "com.github.cb372" %% "scalacache-cache2k" % Versions.cacheCats
     lazy val scalaCache      = "com.github.cb372" %% "scalacache-cats-effect" % Versions.cacheCats
     lazy val catsRetry       = "com.github.cb372" %% "cats-retry" % Versions.catsRetry
+    lazy val airframeLog     = "org.wvlet.airframe" %% "airframe-log" % Versions.airframeLog
 
     // Compiler plugins
     lazy val kindProjector = "org.spire-math" %% "kind-projector" % Versions.kindProjector
