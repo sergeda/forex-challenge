@@ -31,8 +31,8 @@ class LiveOneFrameCacheUpdaterSpec extends AnyFreeSpec with EitherValues with Mo
   "OneFrameCacheUpdater " - {
     "should correctly update cache with data from oneFrame" in {
       (oneFrame
-        .get(_: NonEmptyList[Rate.Pair]))
-        .expects(*)
+        .get(_: NonEmptyList[Rate.Pair], _: Boolean))
+        .expects(*, *)
         .returning(IO.pure(oneFrameResult.asRight[errors.Error]))
         .once()
       (cacheIO.put(_: String, _: Rate)).expects(*, *).returning(IO.unit).twice()

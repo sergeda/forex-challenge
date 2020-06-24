@@ -41,20 +41,23 @@ class LiveOneFrame[F[_]: Sync: Concurrent: Timer](config: OneFrameConfig)(
   override def get(pair: Rate.Pair): F[Either[Error, Rate]] =
     EitherT(get(NonEmptyList(pair, List.empty))).map(_.head).value
 
-  override def get(pairs: NonEmptyList[Rate.Pair]): F[Either[Error, NonEmptyList[Rate]]] = {
+  override def get(pairs: NonEmptyList[Rate.Pair], retry: Boolean = false): F[Either[Error, NonEmptyList[Rate]]] = {
+    val result = recoverResponse(request(pairs)).map(parseResponse)
+    if(retry) retryResponse(result) else result
+  }
+
+  private def retryResponse(response: F[Either[Error, NonEmptyList[Rate]]]) = {
     val backoffPolicy = limitRetriesByCumulativeDelay[F](config.update, exponentialBackoff[F](10.seconds))
-    recoverResponse(request(pairs))
-      .map(parseResponse)
-      .retryingM(
-        policy = backoffPolicy,
-        wasSuccessful = _.isRight,
-        onFailure = (failed: Either[Error, NonEmptyList[Rate]], details: RetryDetails) =>
-          Sync[F].delay(
-            logger.error(
-              s"Couldn't download rates from One Frame. Error: ${failed.left.get.msg}. Retries so far: ${details.retriesSoFar}"
-            )
+    response.retryingM(
+      policy = backoffPolicy,
+      wasSuccessful = _.isRight,
+      onFailure = (failed: Either[Error, NonEmptyList[Rate]], details: RetryDetails) =>
+        Sync[F].delay(
+          logger.error(
+            s"Couldn't download rates from One Frame. Error: ${failed.left.get.msg}. Retries so far: ${details.retriesSoFar}"
+          )
         )
-      )
+    )
   }
 
   private def formUrl(pairs: NonEmptyList[Rate.Pair]): String = {
@@ -74,7 +77,7 @@ class LiveOneFrame[F[_]: Sync: Concurrent: Timer](config: OneFrameConfig)(
     response.map(_.body).attempt.map(_.leftMap(_.getMessage).flatten)
 
   private def parseResponse(response: Either[String, String]): Either[Error, NonEmptyList[Rate]] =
-    response.leftMap(error => OneFrameLookupFailed(error)).map { decodeContent }.flatten
+    response.leftMap(OneFrameLookupFailed.apply).map { decodeContent }.flatten
 
   private def decodeContent(content: String): Either[Error, NonEmptyList[Rate]] =
     decode[NonEmptyList[OneFrameResponse]](content)

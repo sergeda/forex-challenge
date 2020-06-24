@@ -24,7 +24,7 @@ class LiveOneFrameCacheUpdater[F[_]: Monad] private (cache: Cache[F], oneFrame: 
 
   private def getRates(pairs: List[Rate.Pair]): F[Option[NonEmptyList[Rate]]] =
     NonEmptyList.fromList(pairs) match {
-      case Some(value) => oneFrame.get(value).map(_.toOption)
+      case Some(value) => oneFrame.get(value, true).map(_.toOption)
       case None        => Monad[F].pure(none[NonEmptyList[Rate]])
     }
 

@@ -11,7 +11,7 @@ trait Algebra[F[_]] {
 trait OneFrame[F[_]] {
   def get(pair: Rate.Pair): F[Error Either Rate]
 
-  def get(pairs: NonEmptyList[Rate.Pair]): F[Error Either NonEmptyList[Rate]]
+  def get(pairs: NonEmptyList[Rate.Pair], retry: Boolean = false): F[Error Either NonEmptyList[Rate]]
 }
 
 trait OneFrameCacheUpdater[F[_]] {
