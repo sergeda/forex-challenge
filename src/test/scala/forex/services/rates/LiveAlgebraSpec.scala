@@ -15,10 +15,10 @@ import org.scalatest.matchers.should.Matchers
 
 class LiveAlgebraSpec extends AnyFreeSpec with EitherValues with MockFactory with Matchers {
 
-  val cacheIO: Cache[IO] = stub[Cache[IO]]
-  val oneFrame: OneFrame[IO]           = stub[OneFrame[IO]]
+  val cacheIO: Cache[IO]     = stub[Cache[IO]]
+  val oneFrame: OneFrame[IO] = stub[OneFrame[IO]]
 
-  val algebra = new LiveAlgebra(IO.pure(cacheIO), oneFrame)
+  val algebra = new LiveAlgebra(cacheIO, oneFrame)
 
   val rate = Rate(Rate.Pair(USD, EUR), Price(BigDecimal(100)), Timestamp.now)
 

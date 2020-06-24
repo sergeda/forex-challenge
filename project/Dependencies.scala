@@ -10,14 +10,15 @@ object Dependencies {
     val circe      = "0.13.0"
     val pureConfig = "0.12.1"
     val sttp       = "2.0.7"
-    val cacheCats       = "0.28.0"
+    val cacheCats  = "0.28.0"
+    val catsRetry  = "1.0.0"
 
-    val kindProjector       = "0.9.10"
-    val logback             = "1.2.3"
-    val scalaCheck          = "1.14.3"
-    val scalaTest           = "3.1.0"
-    val catsScalaCheck      = "0.2.0"
-    val scalaMock           = "4.4.0"
+    val kindProjector  = "0.9.10"
+    val logback        = "1.2.3"
+    val scalaCheck     = "1.14.3"
+    val scalaTest      = "3.1.0"
+    val catsScalaCheck = "0.2.0"
+    val scalaMock      = "4.4.0"
   }
 
   object Libraries {
@@ -39,8 +40,9 @@ object Dependencies {
     lazy val pureConfig      = "com.github.pureconfig" %% "pureconfig" % Versions.pureConfig
     lazy val sttpCore        = "com.softwaremill.sttp.client" %% "core" % Versions.sttp
     lazy val sttpCats        = "com.softwaremill.sttp.client" %% "async-http-client-backend-cats" % Versions.sttp
-    lazy val cache2k        = "com.github.cb372" %% "scalacache-cache2k" % Versions.cacheCats
-    lazy val scalaCache        = "com.github.cb372" %% "scalacache-cats-effect" % Versions.cacheCats
+    lazy val cache2k         = "com.github.cb372" %% "scalacache-cache2k" % Versions.cacheCats
+    lazy val scalaCache      = "com.github.cb372" %% "scalacache-cats-effect" % Versions.cacheCats
+    lazy val catsRetry       = "com.github.cb372" %% "cats-retry" % Versions.catsRetry
 
     // Compiler plugins
     lazy val kindProjector = "org.spire-math" %% "kind-projector" % Versions.kindProjector
@@ -49,10 +51,10 @@ object Dependencies {
     lazy val logback = "ch.qos.logback" % "logback-classic" % Versions.logback
 
     // Test
-    lazy val scalaTest           = "org.scalatest"     %% "scalatest"                     % Versions.scalaTest
-    lazy val scalaCheck          = "org.scalacheck"    %% "scalacheck"                    % Versions.scalaCheck
-    lazy val catsScalaCheck      = "io.chrisdavenport" %% "cats-scalacheck"               % Versions.catsScalaCheck
-    lazy val scalaMock           = "org.scalamock"     %% "scalamock"                     % Versions.scalaMock
+    lazy val scalaTest      = "org.scalatest"     %% "scalatest"       % Versions.scalaTest
+    lazy val scalaCheck     = "org.scalacheck"    %% "scalacheck"      % Versions.scalaCheck
+    lazy val catsScalaCheck = "io.chrisdavenport" %% "cats-scalacheck" % Versions.catsScalaCheck
+    lazy val scalaMock      = "org.scalamock"     %% "scalamock"       % Versions.scalaMock
   }
 
 }

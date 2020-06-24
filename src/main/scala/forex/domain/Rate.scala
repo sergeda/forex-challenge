@@ -1,7 +1,7 @@
 package forex.domain
 
-import cats.syntax.show._
 import cats.Show
+import cats.syntax.show._
 
 case class Rate(
     pair: Rate.Pair,
@@ -17,5 +17,6 @@ object Rate {
 
   object Pair {
     implicit def show: Show[Pair] = Show.show(pair => pair.from.show + pair.to.show)
+    def apply(currencies: (Currency, Currency)): Pair = Pair(currencies._1, currencies._2)
   }
 }

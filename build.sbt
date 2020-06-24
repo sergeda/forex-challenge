@@ -49,6 +49,7 @@ libraryDependencies ++= Seq(
   Libraries.logback,
   Libraries.cache2k,
   Libraries.scalaCache,
+  Libraries.catsRetry,
   Libraries.scalaTest           % Test,
   Libraries.scalaCheck          % Test,
   Libraries.scalaMock          % Test,

@@ -45,7 +45,7 @@ class LiveOneFrame[F[_]: Monad: Functor: Concurrent](config: OneFrameConfig)(
   private def request(pairs: NonEmptyList[Rate.Pair]): F[ClientResponse] =
     basicRequest
       .get(uri"${formUrl(pairs)}")
-      .header("token", s"token $token", true)
+      .header("token", token, true)
       .response(asString("UTF-8"))
       .readTimeout(timeout)
       .send()
