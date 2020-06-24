@@ -1,6 +1,6 @@
 # A local proxy for Forex rates challenge
 
-####Build a local proxy for getting Currency Exchange Rates
+### Build a local proxy for getting Currency Exchange Rates
 
 See [details](https://github.com/paidy/interview/blob/master/Forex.md "Details")
 
