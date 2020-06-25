@@ -28,7 +28,6 @@ object Dependencies {
 
     lazy val cats           = "org.typelevel" %% "cats-core"        % Versions.cats
     lazy val catsEffect     = "org.typelevel" %% "cats-effect"      % Versions.catsEffect
-    lazy val catsEffectLaws = "org.typelevel" %% "cats-effect-laws" % Versions.catsEffect
     lazy val fs2            = "co.fs2"        %% "fs2-core"         % Versions.fs2
 
     lazy val http4sDsl       = http4s("http4s-dsl")

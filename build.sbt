@@ -34,7 +34,6 @@ libraryDependencies ++= Seq(
   compilerPlugin(Libraries.kindProjector),
   Libraries.cats,
   Libraries.catsEffect,
-  Libraries.catsEffectLaws,
   Libraries.fs2,
   Libraries.http4sDsl,
   Libraries.http4sServer,
